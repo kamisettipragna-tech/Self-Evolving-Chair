@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>The Self-Evolving Chair | Decentralized Product Design System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #e8f4f8 0%, #d1e8f0 100%);
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        body.light-mode {
+            background: linear-gradient(135deg, #e8f4f8 0%, #d1e8f0 100%);
+        }
+
+        body.dark-mode {
+            background: linear-gradient(135deg, #1a2a3a 0%, #0f1a24 100%);
+        }
+
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 15px 30px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .dark-mode .navbar {
+            background: rgba(26, 42, 58, 0.98);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 24px;
+            font-weight: 800;
+            color: #2c5f8a;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #4a90e2, #2c5f8a);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 2px 10px rgba(74, 144, 226, 0.3);
+        }
+
+        .dark-mode .logo {
+            color: #e0e0e0;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            border-radius: 10px;
+            color: #2c5f8a;
+        }
+
+        .dark-mode .nav-btn {
+            color: #c8d6e5;
+        }
+
+        .nav-btn:hover {
+            background: rgba(74, 144, 226, 0.1);
+            color: #4a90e2;
+        }
+
+        .theme-toggle {
+            background: linear-gradient(135deg, #4a90e2, #2c5f8a);
+            color: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .theme-toggle:hover {
+            transform: rotate(15deg);
+        }
+
+        /* Main Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .dark-mode .card {
+            background: rgba(26, 42, 58, 0.95);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #2c5f8a;
+        }
+
+        .dark-mode .card-title {
+            color: #c8d6e5;
+        }
+
+        /* Live Chat & Voting */
+        .live-session {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .chat-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 20px;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dark-mode .chat-container {
+            background: rgba(26, 42, 58, 0.95);
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding: 10px;
+        }
+
+        .chat-message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 10px;
+            animation: slideInMessage 0.3s;
+        }
+
+        @keyframes slideInMessage {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .message-user {
+            background: linear-gradient(135deg, #e3f2fd, #bbdef5);
+            border-left: 3px solid #4a90e2;
+        }
+
+        .message-bot {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6d9);
+            border-left: 3px solid #66bb6a;
+        }
+
+        .message-system {
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+            border-left: 3px solid #ffa726;
+            text-align: center;
+            font-style: italic;
+        }
+
+        .dark-mode .message-user {
+            background: linear-gradient(135deg, #1a3a5c, #0f2a4a);
+        }
+        .dark-mode .message-bot {
+            background: linear-gradient(135deg, #1a5c3a, #0f4a2a);
+        }
+        .dark-mode .message-system {
+            background: linear-gradient(135deg, #5c3a1a, #4a2a0f);
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .message-content {
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-family: inherit;
+        }
+
+        .dark-mode .chat-input {
+            background: #2d3748;
+            border-color: #4a5568;
+            color: white;
+        }
+
+        .active-votes {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 20px;
+            height: 600px;
+            overflow-y: auto;
+        }
+
+        .dark-mode .active-votes {
+            background: rgba(26, 42, 58, 0.95);
+        }
+
+        .vote-item {
+            background: rgba(74, 144, 226, 0.08);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            animation: fadeInUp 0.5s;
+            border: 1px solid rgba(74, 144, 226, 0.2);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .vote-item:hover {
+            transform: translateX(5px);
+            background: rgba(74, 144, 226, 0.15);
+        }
+
+        .vote-count {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4a90e2;
+        }
+
+        .dark-mode .vote-count {
+            color: #66bb6a;
+        }
+
+        .vote-buttons-live {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .online-users {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(74, 144, 226, 0.1);
+            border-radius: 10px;
+        }
+
+        .user-badge {
+            padding: 5px 10px;
+            background: linear-gradient(135deg, #4a90e2, #2c5f8a);
+            border-radius: 20px;
+            font-size: 12px;
+            color: white;
+        }
+
+        /* Design Studio */
+        .design-studio {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .preview-container {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8edf2 100%);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .chair-illustration {
+            width: 100%;
+            max-width: 350px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .chair-svg {
+            width: 100%;
+            height: auto;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.1));
+        }
+
+        .dark-mode .preview-container {
+            background: linear-gradient(135deg, #1e2a3a 0%, #15202b 100%);
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2c5f8a;
+        }
+
+        .dark-mode .control-group label {
+            color: #c8d6e5;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-family: inherit;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .dark-mode input, .dark-mode select, .dark-mode textarea {
+            background: #2d3748;
+            border-color: #4a5568;
+            color: white;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+
+        button {
+            background: linear-gradient(135deg, #4a90e2, #2c5f8a);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(74, 144, 226, 0.4);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .live-session {
+                grid-template-columns: 1fr;
+            }
+            .design-studio {
+                grid-template-columns: 1fr;
+            }
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            .navbar {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #66bb6a, #4caf50);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            animation: slideIn 0.3s;
+            z-index: 1000;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            font-weight: 500;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .active-tab {
+            background: linear-gradient(135deg, #4a90e2, #2c5f8a);
+            color: white !important;
+        }
+
+        /* CRITICAL: Only show active tab, hide others */
+        .tab-content {
+            display: none !important;
+        }
+
+        .tab-content.active {
+            display: block !important;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #4a90e2, #2c5f8a);
+            border-radius: 10px;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 15px;
+            background: rgba(74, 144, 226, 0.08);
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: scale(1.05);
+            background: rgba(74, 144, 226, 0.12);
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: #4a90e2;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 30px;
+            border-left: 2px solid #4a90e2;
+            padding-left: 20px;
+            margin-left: 10px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -8px;
+            top: 0;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #4a90e2;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Navbar -->
+        <div class="navbar">
+            <div class="logo">
+                <div class="logo-icon">🪑</div>
+                <span>The Self-Evolving Chair</span>
+            </div>
+            <div class="nav-links">
+                <button class="nav-btn active-tab" id="dashboardBtn" onclick="showTab('dashboard')">📊 Dashboard</button>
+                <button class="nav-btn" id="studioBtn" onclick="showTab('studio')">🎨 Design Studio</button>
+                <button class="nav-btn" id="liveBtn" onclick="showTab('live')">💬 Live Voting</button>
+                <button class="nav-btn" id="timelineBtn" onclick="showTab('timeline')">📅 Timeline</button>
+                <div class="theme-toggle" onclick="toggleTheme()">🌓</div>
+            </div>
+        </div>
+
+        <!-- Dashboard Tab - Only this is visible initially -->
+        <div id="dashboard" class="tab-content active">
+            <div class="dashboard-grid">
+                <div class="card">
+                    <div class="card-title">
+                        <span>📈 Evolution Stats</span>
+                    </div>
+                    <canvas id="evolutionChart" style="max-height: 300px;"></canvas>
+                </div>
+                <div class="card">
+                    <div class="card-title">
+                        <span>🏆 Top Contributors</span>
+                    </div>
+                    <div id="leaderboard"></div>
+                </div>
+                <div class="card">
+                    <div class="card-title">
+                        <span>📊 Design Trends</span>
+                    </div>
+                    <div class="stat-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalDesigns">0</div>
+                            <div>Total Designs</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="activeVoters">0</div>
+                            <div>Active Voters</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="avgErgonomics">0</div>
+                            <div>Avg Ergonomics</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="sustainabilityScore">0</div>
+                            <div>Sustainability</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Voting Session Tab - Hidden initially -->
+        <div id="live" class="tab-content">
+            <div class="live-session">
+                <div class="chat-container">
+                    <div class="card-title">
+                        <span>💬 Live Community Chat</span>
+                        <span id="onlineCount" style="font-size: 14px;">👥 0 online</span>
+                    </div>
+                    <div class="online-users" id="onlineUsers"></div>
+                    <div class="chat-messages" id="chatMessages"></div>
+                    <div class="chat-input-area">
+                        <input type="text" class="chat-input" id="chatInput" placeholder="Type 'vote for [design name]' or just chat..." onkeypress="handleChatKeyPress(event)">
+                        <button onclick="sendChatMessage()">Send</button>
+                    </div>
+                </div>
+                <div class="active-votes">
+                    <div class="card-title">
+                        <span>🗳️ Active Voting</span>
+                        <span>🏅 Reputation: <span id="userReputation">100</span></span>
+                    </div>
+                    <div id="liveVotesList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Design Studio Tab - Hidden initially -->
+        <div id="studio" class="tab-content">
+            <div class="card">
+                <div class="card-title">
+                    <span>🎨 Create Your Chair</span>
+                    <button onclick="submitDesign()">✨ Submit Design</button>
+                </div>
+                <div class="design-studio">
+                    <div class="preview-container">
+                        <div class="chair-illustration">
+                            <svg class="chair-svg" viewBox="0 0 200 200" id="chairSvg">
+                                <!-- Chair back -->
+                                <rect x="65" y="30" width="70" height="100" rx="8" fill="#8B6914" id="chairBack"/>
+                                <!-- Chair seat -->
+                                <rect x="45" y="130" width="110" height="40" rx="8" fill="#A0782C" id="chairSeat"/>
+                                <!-- Chair legs -->
+                                <rect x="55" y="170" width="8" height="25" fill="#5C4033"/>
+                                <rect x="137" y="170" width="8" height="25" fill="#5C4033"/>
+                                <!-- Armrests -->
+                                <rect x="35" y="80" width="10" height="40" rx="5" fill="#A0782C"/>
+                                <rect x="155" y="80" width="10" height="40" rx="5" fill="#A0782C"/>
+                                <!-- Lumbar support indicator -->
+                                <rect x="65" y="80" width="70" height="15" fill="#4a90e2" opacity="0.7" id="lumbarIndicator"/>
+                            </svg>
+                        </div>
+                        <button onclick="generateAIVariation()" style="margin-top: 20px;">🤖 AI Generate</button>
+                    </div>
+                    <div>
+                        <div class="control-group">
+                            <label>Chair Name</label>
+                            <input type="text" id="designName" placeholder="My Awesome Chair">
+                        </div>
+                        <div class="control-group">
+                            <label>Chair Type</label>
+                            <select id="chairType" onchange="updateChairPreview()">
+                                <option value="office">Office Chair</option>
+                                <option value="gaming">Gaming Chair</option>
+                                <option value="lounge">Lounge Chair</option>
+                                <option value="dining">Dining Chair</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label>Material</label>
+                            <select id="material" onchange="updateChairPreview()">
+                                <option value="wood">Wood</option>
+                                <option value="metal">Metal</option>
+                                <option value="plastic">Plastic</option>
+                                <option value="carbon fiber">Carbon Fiber</option>
+                                <option value="recycled">Recycled Materials</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label>Color</label>
+                            <input type="color" id="color" value="#8B6914" onchange="updateChairPreview()">
+                        </div>
+                        <div class="control-group">
+                            <label>Height (cm): <span id="heightVal">90</span></label>
+                            <input type="range" id="height" min="70" max="120" value="90" oninput="updateChairPreview()">
+                        </div>
+                        <div class="control-group">
+                            <label>Lumbar Support: <span id="lumbarVal">7</span>/10</label>
+                            <input type="range" id="lumbar" min="1" max="10" value="7" oninput="updateChairPreview()">
+                        </div>
+                        <div class="control-group">
+                            <label>Recycled Content: <span id="recycledVal">0</span>%</label>
+                            <input type="range" id="recycled" min="0" max="100" value="0" oninput="updateChairPreview()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline Tab - Hidden initially -->
+        <div id="timeline" class="tab-content">
+            <div class="card">
+                <div class="card-title">
+                    <span>📅 Evolution Timeline</span>
+                    <button onclick="exportDesigns()">📥 Export</button>
+                </div>
+                <div id="timelineContent" class="timeline"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let designs = [];
+        let currentUser = {
+            id: 'user_' + Math.random().toString(36).substr(2, 9),
+            name: 'Designer_' + Math.floor(Math.random() * 1000),
+            reputation: 100,
+            votes: []
+        };
+        let chart = null;
+        let onlineUsers = new Map();
+        let chatMessages = [];
+
+        // Update chair preview with SVG
+        function updateChairPreview() {
+            const color = document.getElementById('color').value;
+            const lumbar = parseInt(document.getElementById('lumbar').value);
+            const material = document.getElementById('material').value;
+            const height = parseInt(document.getElementById('height').value);
+            
+            document.getElementById('heightVal').textContent = height;
+            document.getElementById('lumbarVal').textContent = lumbar;
+            document.getElementById('recycledVal').textContent = document.getElementById('recycled').value;
+            
+            // Update SVG colors
+            const backHeight = 30 + (height - 70) * 1.5;
+            document.getElementById('chairBack').setAttribute('height', backHeight);
+            document.getElementById('chairBack').setAttribute('fill', color);
+            document.getElementById('chairSeat').setAttribute('fill', color);
+            
+            // Update lumbar indicator position and opacity
+            const lumbarY = 30 + (lumbar / 10) * backHeight;
+            document.getElementById('lumbarIndicator').setAttribute('y', lumbarY);
+            document.getElementById('lumbarIndicator').setAttribute('opacity', 0.4 + (lumbar / 10) * 0.5);
+            
+            // Material effect
+            if (material === 'wood') {
+                document.getElementById('chairBack').setAttribute('stroke', '#5C4033');
+                document.getElementById('chairBack').setAttribute('stroke-width', '2');
+            } else if (material === 'metal') {
+                document.getElementById('chairBack').setAttribute('stroke', '#888');
+                document.getElementById('chairBack').setAttribute('stroke-width', '1');
+            } else {
+                document.getElementById('chairBack').setAttribute('stroke', 'none');
+            }
+        }
+
+        // Initialize chat
+        function initChat() {
+            addUserToOnline(currentUser.name);
+            addSystemMessage(`🎉 Welcome ${currentUser.name}!`);
+            addSystemMessage("💡 Type 'vote for [design name]' to vote");
+            startBotMessages();
+        }
+
+        function addUserToOnline(username) {
+            if (!onlineUsers.has(username)) {
+                onlineUsers.set(username, { id: Date.now(), name: username });
+                updateOnlineUsers();
+                addSystemMessage(`👤 ${username} joined`);
+            }
+        }
+
+        function updateOnlineUsers() {
+            const container = document.getElementById('onlineUsers');
+            const countSpan = document.getElementById('onlineCount');
+            const users = Array.from(onlineUsers.values());
+            countSpan.textContent = `👥 ${users.length} online`;
+            container.innerHTML = users.map(user => `<div class="user-badge">${user.name}</div>`).join('');
+        }
+
+        function addMessage(username, message, type = 'user') {
+            const messageObj = {
+                id: Date.now(),
+                username: username,
+                message: message,
+                type: type,
+                timestamp: new Date().toLocaleTimeString()
+            };
+            chatMessages.push(messageObj);
+            renderChatMessages();
+            const chatContainer = document.getElementById('chatMessages');
+            if (chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function addSystemMessage(message) { addMessage('System', message, 'system'); }
+        function addBotMessage(message) { addMessage('AI Bot', message, 'bot'); }
+
+        function renderChatMessages() {
+            const container = document.getElementById('chatMessages');
+            if (!container) return;
+            container.innerHTML = chatMessages.map(msg => `
+                <div class="chat-message message-${msg.type}">
+                    <div class="message-header">
+                        <span style="color: ${msg.type === 'user' ? '#4a90e2' : msg.type === 'bot' ? '#66bb6a' : '#ffa726'}">${msg.username}</span>
+                        <span style="font-size: 10px;">${msg.timestamp}</span>
+                    </div>
+                    <div class="message-content">${msg.message}</div>
+                </div>
+            `).join('');
+        }
+
+        function handleChatKeyPress(event) { if (event.key === 'Enter') sendChatMessage(); }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            if (!input) return;
+            const message = input.value.trim();
+            if (!message) return;
+            addMessage(currentUser.name, message, 'user');
+            processCommand(message);
+            input.value = '';
+        }
+
+        function processCommand(message) {
+            const lowerMsg = message.toLowerCase();
+            if (lowerMsg.startsWith('vote for')) {
+                const designName = message.substring(9).trim();
+                handleVoteCommand(designName);
+            } else if (lowerMsg === 'list designs') {
+                listDesigns();
+            } else if (lowerMsg === 'top designs') {
+                showTopDesigns();
+            } else {
+                setTimeout(() => generateAIResponse(message), 500);
+            }
+        }
+
+        function handleVoteCommand(designName) {
+            const design = designs.find(d => d.name.toLowerCase().includes(designName.toLowerCase()));
+            if (!design) {
+                addBotMessage(`❌ Design "${designName}" not found`);
+                return;
+            }
+            if (design.voters.includes(currentUser.id)) {
+                addBotMessage(`⚠️ Already voted for "${design.name}"`);
+                return;
+            }
+            const voteWeight = Math.floor(currentUser.reputation / 20) + 1;
+            design.votes += voteWeight;
+            design.voters.push(currentUser.id);
+            currentUser.reputation += 5;
+            document.getElementById('userReputation').textContent = currentUser.reputation;
+            localStorage.setItem('chair_designs', JSON.stringify(designs));
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            addBotMessage(`✅ Voted for "${design.name}"! +${voteWeight} votes`);
+            addSystemMessage(`🎉 ${currentUser.name} voted for "${design.name}"!`);
+            renderLiveVotes();
+            updateDashboard();
+            updateTimeline();
+            checkEvolutionTrigger();
+        }
+
+        function listDesigns() {
+            const list = designs.map((d, i) => `${i+1}. ${d.name} (${d.votes} votes)`).join('\n');
+            addBotMessage(`📋 Designs:\n${list}`);
+        }
+
+        function showTopDesigns() {
+            const top3 = [...designs].sort((a, b) => b.votes - a.votes).slice(0, 3);
+            const list = top3.map((d, i) => `${i+1}. ${d.name} - ${d.votes} votes`).join('\n');
+            addBotMessage(`🏆 Top Designs:\n${list}`);
+        }
+
+        function generateAIResponse(message) {
+            const responses = [
+                "Interesting! What material do you think works best?",
+                "Great idea! Have you tried our AI variation generator?",
+                "The community loves ergonomic designs with 8+ lumbar support!",
+                "Recycled materials are trending! Our top design uses 85% recycled content.",
+                "Every vote helps evolve our chairs! Keep participating!"
+            ];
+            addBotMessage(responses[Math.floor(Math.random() * responses.length)]);
+        }
+
+        function startBotMessages() {
+            setInterval(() => {
+                if (Math.random() > 0.7 && chatMessages.length > 0) {
+                    const msgs = [
+                        "🤖 Lumbar support 7-9 is most ergonomic!",
+                        "💚 Recycled materials reduce footprint by 40%",
+                        "🎯 Current leader has " + Math.max(...designs.map(d => d.votes), 0) + " votes!",
+                        "💬 Type 'help' for commands"
+                    ];
+                    addBotMessage(msgs[Math.floor(Math.random() * msgs.length)]);
+                }
+            }, 25000);
+        }
+
+        function renderLiveVotes() {
+            const container = document.getElementById('liveVotesList');
+            if (!container) return;
+            const sorted = [...designs].sort((a, b) => b.votes - a.votes);
+            container.innerHTML = sorted.map(design => `
+                <div class="vote-item" onclick="quickVote('${design.name.replace(/'/g, "\\'")}')">
+                    <div style="display: flex; justify-content: space-between;">
+                        <div><strong>${design.name}</strong><div style="font-size: 12px;">by ${design.creator}</div></div>
+                        <div class="vote-count">⭐ ${design.votes}</div>
+                    </div>
+                    <div style="font-size: 12px;">${design.parameters.material} • Lumbar ${design.parameters.ergonomics.lumbarSupport}/10</div>
+                    <div class="vote-buttons-live">
+                        <button onclick="event.stopPropagation(); quickVote('${design.name.replace(/'/g, "\\'")}')">👍 Vote</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function quickVote(designName) { handleVoteCommand(designName); }
+
+        function submitDesign() {
+            const design = {
+                id: 'design_' + Date.now(),
+                version: designs.length + 1,
+                name: document.getElementById('designName').value || `Chair v${designs.length + 1}`,
+                creator: currentUser.name,
+                creatorId: currentUser.id,
+                timestamp: new Date().toISOString(),
+                parameters: {
+                    chairType: document.getElementById('chairType').value,
+                    material: document.getElementById('material').value,
+                    color: document.getElementById('color').value,
+                    dimensions: { height: parseInt(document.getElementById('height').value) },
+                    ergonomics: { lumbarSupport: parseInt(document.getElementById('lumbar').value) },
+                    sustainability: { recycledContent: parseInt(document.getElementById('recycled').value) }
+                },
+                votes: 0,
+                voters: [],
+                hash: '0x' + Math.random().toString(36).substr(2, 64),
+                generation: Math.floor(designs.length / 5) + 1
+            };
+            designs.unshift(design);
+            localStorage.setItem('chair_designs', JSON.stringify(designs));
+            showToast('✅ Design submitted!');
+            addSystemMessage(`🎨 New design: "${design.name}" by ${currentUser.name}`);
+            updateDashboard();
+            renderLiveVotes();
+            updateTimeline();
+        }
+
+        function generateAIVariation() {
+            const materials = ['wood', 'metal', 'carbon fiber', 'recycled', 'bamboo'];
+            const colors = ['#8B6914', '#4a90e2', '#66bb6a', '#ffa726', '#7c4dff'];
+            document.getElementById('material').value = materials[Math.floor(Math.random() * materials.length)];
+            document.getElementById('color').value = colors[Math.floor(Math.random() * colors.length)];
+            document.getElementById('lumbar').value = Math.floor(Math.random() * 5) + 6;
+            document.getElementById('recycled').value = Math.floor(Math.random() * 80) + 20;
+            updateChairPreview();
+            addBotMessage('🤖 AI generated an optimized variation!');
+        }
+
+        function checkEvolutionTrigger() {
+            const totalVotes = designs.reduce((sum, d) => sum + d.votes, 0);
+            if (totalVotes > 0 && totalVotes % 15 === 0) evolveDesigns();
+        }
+
+        function evolveDesigns() {
+            const top = [...designs].sort((a, b) => b.votes - a.votes).slice(0, 2);
+            if (top.length < 2) return;
+            const evolved = {
+                id: 'design_' + Date.now(),
+                version: designs.length + 1,
+                name: `Evolved from ${top[0].name}`,
+                creator: 'AI Evolution',
+                creatorId: 'ai',
+                timestamp: new Date().toISOString(),
+                parameters: {
+                    chairType: top[0].parameters.chairType,
+                    material: top[1].parameters.material,
+                    color: top[0].parameters.color,
+                    dimensions: { height: (top[0].parameters.dimensions.height + top[1].parameters.dimensions.height) / 2 },
+                    ergonomics: { lumbarSupport: (top[0].parameters.ergonomics.lumbarSupport + top[1].parameters.ergonomics.lumbarSupport) / 2 },
+                    sustainability: { recycledContent: (top[0].parameters.sustainability.recycledContent + top[1].parameters.sustainability.recycledContent) / 2 }
+                },
+                votes: 0,
+                voters: [],
+                hash: '0x' + Math.random().toString(36).substr(2, 64),
+                generation: Math.max(top[0].generation, top[1].generation) + 1
+            };
+            designs.push(evolved);
+            localStorage.setItem('chair_designs', JSON.stringify(designs));
+            addSystemMessage(`🧬 EVOLUTION! New generation ${evolved.generation} created!`);
+            updateDashboard();
+            renderLiveVotes();
+            updateTimeline();
+        }
+
+        function updateDashboard() {
+            if (designs.length === 0) return;
+            document.getElementById('totalDesigns').textContent = designs.length;
+            document.getElementById('activeVoters').textContent = [...new Set(designs.flatMap(d => d.voters))].length;
+            const avgErgo = designs.reduce((s, d) => s + d.parameters.ergonomics.lumbarSupport, 0) / designs.length;
+            document.getElementById('avgErgonomics').textContent = avgErgo.toFixed(1);
+            const avgSustain = designs.reduce((s, d) => s + d.parameters.sustainability.recycledContent, 0) / designs.length;
+            document.getElementById('sustainabilityScore').textContent = Math.floor(avgSustain);
+            const contributors = {};
+            designs.forEach(d => { contributors[d.creator] = (contributors[d.creator] || 0) + 1 + (d.votes / 10); });
+            const sorted = Object.entries(contributors).sort((a, b) => b[1] - a[1]).slice(0, 5);
+            document.getElementById('leaderboard').innerHTML = sorted.map(([n, s], i) => `
+                <div style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid rgba(0,0,0,0.05);">
+                    <span>${i+1}. ${n}</span><span style="color:#4a90e2;font-weight:bold;">${Math.floor(s)} pts</span>
+                </div>
+            `).join('');
+            updateChart();
+        }
+
+        function updateChart() {
+            const ctx = document.getElementById('evolutionChart');
+            if (!ctx) return;
+            const gens = {};
+            designs.forEach(d => { gens[d.generation] = (gens[d.generation] || 0) + 1; });
+            const labels = Object.keys(gens).sort((a,b)=>a-b);
+            const data = labels.map(l => gens[l]);
+            if (chart) chart.destroy();
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: { labels: labels.map(l=>`Gen ${l}`), datasets: [{ label: 'Designs per Generation', data: data, borderColor: '#4a90e2', backgroundColor: 'rgba(74,144,226,0.1)', tension: 0.4, fill: true }] },
+                options: { responsive: true, maintainAspectRatio: true }
+            });
+        }
+
+        function updateTimeline() {
+            const container = document.getElementById('timelineContent');
+            if (!container) return;
+            const sorted = [...designs].sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+            container.innerHTML = sorted.map(d => `
+                <div class="timeline-item">
+                    <div style="font-weight:bold;color:#4a90e2;">v${d.version} - ${d.name}</div>
+                    <div style="font-size:12px;">By ${d.creator} | Gen ${d.generation} | ${d.votes} votes</div>
+                    <div style="font-size:12px;">${d.parameters.material} • Lumbar ${d.parameters.ergonomics.lumbarSupport}/10</div>
+                    <div style="font-size:10px;color:#888;">${d.hash.slice(0,16)}... | ${new Date(d.timestamp).toLocaleString()}</div>
+                </div>
+            `).join('');
+        }
+
+        function exportDesigns() {
+            const data = { exportedAt: new Date().toISOString(), designs, total: designs.length };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `chair-designs-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('📁 Exported!');
+        }
+
+        function seedInitialDesigns() {
+            designs = [
+                { id: 'd1', version:1, name:'Ergo Pro Classic', creator:'DesignMaster', creatorId:'u1', timestamp:new Date(Date.now()-7*24*60*60*1000).toISOString(), parameters:{ chairType:'office', material:'wood', color:'#8B6914', dimensions:{height:90}, ergonomics:{lumbarSupport:8}, sustainability:{recycledContent:30} }, votes:45, voters:[], hash:'0xabc123', generation:1 },
+                { id: 'd2', version:2, name:'Gaming Beast', creator:'GamerPro', creatorId:'u2', timestamp:new Date(Date.now()-5*24*60*60*1000).toISOString(), parameters:{ chairType:'gaming', material:'carbon fiber', color:'#4a90e2', dimensions:{height:95}, ergonomics:{lumbarSupport:9}, sustainability:{recycledContent:15} }, votes:32, voters:[], hash:'0xdef456', generation:1 },
+                { id: 'd3', version:3, name:'Eco Lounge', creator:'GreenDesigner', creatorId:'u3', timestamp:new Date(Date.now()-3*24*60*60*1000).toISOString(), parameters:{ chairType:'lounge', material:'recycled', color:'#66bb6a', dimensions:{height:85}, ergonomics:{lumbarSupport:7}, sustainability:{recycledContent:85} }, votes:67, voters:[], hash:'0xghi789', generation:2 }
+            ];
+            localStorage.setItem('chair_designs', JSON.stringify(designs));
+        }
+
+        function loadDesigns() {
+            const stored = localStorage.getItem('chair_designs');
+            if (stored) {
+                designs = JSON.parse(stored);
+            } else {
+                seedInitialDesigns();
+            }
+            renderLiveVotes();
+            updateDashboard();
+            updateTimeline();
+        }
+
+        function showToast(msg) {
+            const t = document.createElement('div');
+            t.className = 'toast';
+            t.textContent = msg;
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 3000);
+        }
+
+        function showTab(tabName) {
+            // Hide all tabs using the CSS class
+            document.querySelectorAll('.tab-content').forEach(t => {
+                t.classList.remove('active');
+            });
+            
+            // Show selected tab
+            const selectedTab = document.getElementById(tabName);
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+            }
+            
+            // Update active button styling
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active-tab');
+            });
+            
+            // Add active class to clicked button
+            const activeButton = document.getElementById(tabName + 'Btn');
+            if (activeButton) {
+                activeButton.classList.add('active-tab');
+            } else if (tabName === 'dashboard') {
+                document.getElementById('dashboardBtn').classList.add('active-tab');
+            }
+            
+            // Update content based on tab
+            if (tabName === 'dashboard') {
+                updateDashboard();
+                updateChart();
+            }
+            if (tabName === 'live') { 
+                renderLiveVotes(); 
+                updateOnlineUsers();
+                renderChatMessages();
+            }
+            if (tabName === 'timeline') updateTimeline();
+            if (tabName === 'studio') updateChairPreview();
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+            if (chart) updateChart();
+        }
+
+        function loadUserData() {
+            const stored = localStorage.getItem('currentUser');
+            if (stored) {
+                currentUser = JSON.parse(stored);
+            } else {
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            }
+            const repSpan = document.getElementById('userReputation');
+            if (repSpan) repSpan.textContent = currentUser.reputation;
+        }
+
+        // Initialize - Dashboard is the only visible tab
+        function init() {
+            // Load saved theme
+            if (localStorage.getItem('theme') === 'dark') {
+                document.body.classList.add('dark-mode');
+            }
+            
+            // Load data
+            loadUserData();
+            loadDesigns();
+            updateChairPreview();
+            
+            // Make sure only dashboard is visible
+            document.querySelectorAll('.tab-content').forEach(t => {
+                t.classList.remove('active');
+            });
+            document.getElementById('dashboard').classList.add('active');
+            
+            // Set active button
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active-tab'));
+            document.getElementById('dashboardBtn').classList.add('active-tab');
+            
+            // Update dashboard content
+            updateDashboard();
+            updateTimeline();
+            
+            // Initialize chat and other features (but chat tab is hidden)
+            initChat();
+            
+            // Real-time random votes
+            setInterval(() => { 
+                if (Math.random() > 0.85 && designs.length) { 
+                    const rd = designs[Math.floor(Math.random()*designs.length)]; 
+                    if(!rd.voters.includes('bot')){ 
+                        rd.votes += Math.floor(Math.random()*3)+1; 
+                        rd.voters.push('bot'); 
+                        localStorage.setItem('chair_designs',JSON.stringify(designs)); 
+                        renderLiveVotes(); 
+                        updateDashboard(); 
+                        updateTimeline(); 
+                    } 
+                } 
+            }, 8000);
+            
+            // Random users joining
+            setInterval(() => { 
+                if (onlineUsers.size < 10 && Math.random() > 0.7) 
+                    addUserToOnline('Guest_' + Math.floor(Math.random()*1000)); 
+            }, 30000);
+            
+            // Event listeners
+            const heightInput = document.getElementById('height');
+            const lumbarInput = document.getElementById('lumbar');
+            const recycledInput = document.getElementById('recycled');
+            const chairTypeSelect = document.getElementById('chairType');
+            const materialSelect = document.getElementById('material');
+            const colorInput = document.getElementById('color');
+            
+            if (heightInput) heightInput.addEventListener('input', updateChairPreview);
+            if (lumbarInput) lumbarInput.addEventListener('input', updateChairPreview);
+            if (recycledInput) recycledInput.addEventListener('input', updateChairPreview);
+            if (chairTypeSelect) chairTypeSelect.addEventListener('change', updateChairPreview);
+            if (materialSelect) materialSelect.addEventListener('change', updateChairPreview);
+            if (colorInput) colorInput.addEventListener('change', updateChairPreview);
+        }
+
+        // Start the application - Dashboard only visible
+        init();
+    </script>
+</body>
+</html>
